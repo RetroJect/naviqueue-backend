@@ -7,7 +7,6 @@ import { TwurpleChatModule } from '@nestjs-twurple/chat';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
 import Joi from 'joi';
 
 @Module({
@@ -19,6 +18,7 @@ import Joi from 'joi';
       validationSchema: Joi.object({
         TWITCH_CLIENT_ID: Joi.string().required(),
         TWITCH_CLIENT_SECRET: Joi.string().required(),
+        TWITCH_CALLBACK_URL: Joi.string().uri().required(),
         TWITCH_CHAT_CHANNEL: Joi.string().required(),
         PORT: Joi.number().port().default(3000),
       }),
@@ -55,7 +55,6 @@ import Joi from 'joi';
       }),
     }),
     AuthModule,
-    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
