@@ -2,8 +2,10 @@ import { Strategy } from 'passport-twitch-new';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { UsersService } from 'src/users/user.service';
+import { UserDocument } from 'src/users/user.schema';
 
-type RawTwitchPassportProfile = {
+export type RawTwitchPassportProfile = {
   id: string;
   login: string;
   display_name: string;
@@ -18,29 +20,12 @@ type RawTwitchPassportProfile = {
   provider: 'twitch';
 };
 
-export type TwitchProfile = {
-  broadcasterType: 'affiliate' | 'partner' | '';
-  createdAt: string;
-  description: string;
-  displayName: string;
-  email?: string;
-  id: string;
-  login: string;
-  offlineImageURL: string;
-  profileImageURL: string;
-  type: 'admin' | 'global_mod' | 'staff' | '';
-  viewCount?: number;
-};
-
-export type UserData = {
-  profile: TwitchProfile;
-  accessToken: string;
-  refreshToken: string;
-};
-
 @Injectable()
 export class TwitchStrategy extends PassportStrategy(Strategy, 'twitch') {
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private usersService: UsersService,
+  ) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     super({
       clientID: configService.get<string>('TWITCH_CLIENT_ID'),
@@ -50,31 +35,23 @@ export class TwitchStrategy extends PassportStrategy(Strategy, 'twitch') {
     });
   }
 
-  validate(
+  async validate(
     accessToken: string,
     refreshToken: string,
-    {
-      broadcaster_type: broadcasterType,
-      created_at: createdAt,
-      display_name: displayName,
-      offline_image_url: offlineImageURL,
-      profile_image_url: profileImageURL,
-      view_count: viewCount,
-      ...rest
-    }: RawTwitchPassportProfile,
-  ): UserData {
-    return {
-      profile: {
-        broadcasterType,
-        createdAt,
-        displayName,
-        offlineImageURL,
-        profileImageURL,
-        viewCount,
-        ...rest,
-      },
-      accessToken,
-      refreshToken,
-    };
+    user: RawTwitchPassportProfile,
+  ): Promise<UserDocument | null> {
+    try {
+      const userDoc = await this.usersService.createOrUpdateFromRaw(
+        accessToken,
+        refreshToken,
+        user,
+      );
+
+      return userDoc;
+    } catch (error) {
+      console.error(`Unable to validate user ${user.id}`, error);
+
+      return null;
+    }
   }
 }

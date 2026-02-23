@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import Joi from 'joi';
 import { TWURPLE_AUTH_PROVIDER, TwurpleAuthModule } from '@nestjs-twurple/auth';
 import { RefreshingAuthProvider } from '@twurple/auth';
 import { TwurpleApiModule } from '@nestjs-twurple/api';
@@ -7,7 +9,6 @@ import { TwurpleChatModule } from '@nestjs-twurple/chat';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
-import Joi from 'joi';
 
 @Module({
   imports: [
@@ -16,13 +17,27 @@ import Joi from 'joi';
       isGlobal: true,
       cache: true,
       validationSchema: Joi.object({
+        MONGO_DB_URI: Joi.string()
+          .uri()
+          .default('mongodb://localhost:27017/naviqueue'),
+        PORT: Joi.number().port().default(3000),
         TWITCH_CLIENT_ID: Joi.string().required(),
         TWITCH_CLIENT_SECRET: Joi.string().required(),
         TWITCH_CALLBACK_URL: Joi.string().uri().required(),
         TWITCH_CHAT_CHANNEL: Joi.string().required(),
-        PORT: Joi.number().port().default(3000),
       }),
     }),
+
+    // Connect to MongoDB instance
+    MongooseModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        return {
+          uri: configService.getOrThrow('MONGO_DB_URI'),
+        };
+      },
+    }),
+
     // Creates automatically refreshing account credentials
     TwurpleAuthModule.registerAsync({
       isGlobal: true,
@@ -54,6 +69,7 @@ import Joi from 'joi';
         channels: configService.get('TWITCH_CHAT_CHANNEL'),
       }),
     }),
+
     AuthModule,
   ],
   controllers: [AppController],
