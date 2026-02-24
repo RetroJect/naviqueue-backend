@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './user.schema';
-import { RawTwitchPassportProfile } from 'src/auth/twitch.strategy';
+import { RawTwitchPassportProfile } from '../auth/twitch.strategy';
 
 @Injectable()
 export class UsersService {
@@ -25,6 +25,7 @@ export class UsersService {
         {
           returnDocument: 'after', // Return updated document
           upsert: true, // Create if not found
+          translateAliases: true, // map twitch field names to schema
         },
       );
 
@@ -34,5 +35,9 @@ export class UsersService {
 
       throw error;
     }
+  }
+
+  async findById(id: string): Promise<UserDocument | null> {
+    return await this.userModel.findOne({ id }).exec();
   }
 }

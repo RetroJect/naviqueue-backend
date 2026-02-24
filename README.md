@@ -39,13 +39,15 @@ Environment variables used by the application are listed in the table below.
 
 |Variable Name|Default Value|Required|Description|
 |-------------|-------------|:------:|-----------|
+|CORS_DOMAINS|`localhost`||CORS allowed domains. Can be a list split by `,`. Example: `localhost,my.domain.com`|
+|PORT|`3000`||The port used by the API|
+|MONGO_DB_URI|`mongodb://localhost:27017/naviqueue`||The connection URI used for MongoDB|
 |TWITCH_CLIENT_ID||:white_check_mark:|Your Twitch application Client ID|
 |TWITCH_CLIENT_SECRET||:white_check_mark:|Your Twitch application Client Secret|
 |TWITCH_CALLBACK_URL||:white_check_mark:|URL configured in your Twitch application that's allowed to accept the OAuth callback|
 |TWITCH_CHAT_CHANNEL||:white_check_mark:|The broadcaster's channel the chat bot should connect to|
-|MONGO_DB_URI|`mongodb://localhost:27017/naviqueue`||The connection URI used for MongoDB|
-|CORS_DOMAINS|`localhost`||CORS allowed domains. Can be a list split by `,`. Example: `localhost,my.domain.com`|
-|PORT|`3000`||The port used by the API|
+|JWT_SECRET|Base64 encoded 31 random bytes||The secret key used to sign the JWTs. Should be manually set to a cryptographically strong passphrase|
+|JWT_LIFETIME_SECONDS|`86400`||The length in seconds the JWT is valid for|
 
 ### Local Deployment
 
