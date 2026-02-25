@@ -4,6 +4,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { JwtPayload } from './auth.service';
 import { UsersService } from '../users/user.service';
+import { UserDocument } from '../users/user.schema';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -18,7 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: JwtPayload) {
+  async validate(payload: JwtPayload): Promise<UserDocument> {
     const user = await this.usersService.findById(payload.id);
 
     // The JWT is valid and signed by us, but somehow the user isn't found

@@ -3,7 +3,7 @@ import { HydratedDocument } from 'mongoose';
 
 @Schema()
 export class User {
-  @Prop()
+  @Prop({ select: false })
   accessToken?: string;
 
   @Prop({
@@ -50,7 +50,7 @@ export class User {
   @Prop({ required: true, alias: 'profile_image_url' })
   profileImageURL: string;
 
-  @Prop()
+  @Prop({ select: false })
   refreshToken?: string;
 
   @Prop()
