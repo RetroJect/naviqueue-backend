@@ -1,6 +1,6 @@
 import { Strategy } from 'passport-twitch-new';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from 'src/users/user.service';
 import { UserDocument } from 'src/users/user.schema';
@@ -22,6 +22,8 @@ export type RawTwitchPassportProfile = {
 
 @Injectable()
 export class TwitchStrategy extends PassportStrategy(Strategy, 'twitch') {
+  private readonly logger = new Logger(TwitchStrategy.name);
+
   constructor(
     private configService: ConfigService,
     private usersService: UsersService,
@@ -49,7 +51,7 @@ export class TwitchStrategy extends PassportStrategy(Strategy, 'twitch') {
 
       return userDoc;
     } catch (error) {
-      console.error(`Unable to validate user ${user.id}`, error);
+      this.logger.error(`Unable to validate user ${user.id}`, error);
 
       return null;
     }

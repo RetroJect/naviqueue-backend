@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -8,6 +12,8 @@ import { UserDocument } from '../users/user.schema';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
+  private readonly logger = new Logger(JwtStrategy.name);
+
   constructor(
     private configService: ConfigService,
     private usersService: UsersService,
@@ -24,10 +30,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     // The JWT is valid and signed by us, but somehow the user isn't found
     if (user === null) {
-      console.error(`Unable to locate user ${payload.id} from JWT`);
-      throw new InternalServerErrorException(
-        'Unable to verify JWT, please log in again',
-      );
+      this.logger.error(`Unable to locate user ${payload.id} from JWT`);
+
+      throw new InternalServerErrorException({
+        success: false,
+        message: 'Unable to verify JWT, please log in again',
+      });
     }
 
     return user;
