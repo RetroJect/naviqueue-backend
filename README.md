@@ -42,6 +42,9 @@ Environment variables used by the application are listed in the table below.
 |CORS_DOMAINS|`localhost`||CORS allowed domains. Can be a list split by `,`. Example: `localhost,my.domain.com`|
 |PORT|`3000`||The port used by the API|
 |MONGO_DB_URI|`mongodb://localhost:27017/naviqueue`||The connection URI used for MongoDB|
+|NAVIDROME_URL||:white_check_mark:|The URL of your Navidrome (or SubSonic compatible) server|
+|NAVIDROME_USER||:white_check_mark:|The account's username used to connect|
+|NAVIDROME_PASSWORD||:white_check_mark:|The account's password used to connect|
 |TWITCH_CLIENT_ID||:white_check_mark:|Your Twitch application Client ID|
 |TWITCH_CLIENT_SECRET||:white_check_mark:|Your Twitch application Client Secret|
 |TWITCH_CALLBACK_URL||:white_check_mark:|URL configured in your Twitch application that's allowed to accept the OAuth callback|

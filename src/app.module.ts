@@ -10,6 +10,7 @@ import { randomBytes } from 'crypto';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { NavidromeModule } from './navidrome/navidrome.module';
 
 @Module({
   imports: [
@@ -18,14 +19,26 @@ import { AuthModule } from './auth/auth.module';
       isGlobal: true,
       cache: true,
       validationSchema: Joi.object({
+        /* Server Configuration */
         PORT: Joi.number().port().default(3000),
+
+        /* MongoDB Configuration */
         MONGO_DB_URI: Joi.string()
           .uri()
           .default('mongodb://localhost:27017/naviqueue'),
+
+        /* Navidrome Configuration */
+        NAVIDROME_URL: Joi.string().uri().required(),
+        NAVIDROME_USER: Joi.string().required(),
+        NAVIDROME_PASSWORD: Joi.string().required(),
+
+        /* Twitch Configuration */
         TWITCH_CLIENT_ID: Joi.string().required(),
         TWITCH_CLIENT_SECRET: Joi.string().required(),
         TWITCH_CALLBACK_URL: Joi.string().uri().required(),
         TWITCH_CHAT_CHANNEL: Joi.string().required(),
+
+        /* JWT Configuration */
         JWT_SECRET: Joi.string().default(randomBytes(31).toString('base64')),
         JWT_LIFETIME_SECONDS: Joi.number().positive().default(86400), // 24 hours
       }),
@@ -74,6 +87,7 @@ import { AuthModule } from './auth/auth.module';
     }),
 
     AuthModule,
+    NavidromeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
