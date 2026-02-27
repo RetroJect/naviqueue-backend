@@ -1,21 +1,24 @@
 import {
-  Body,
+  BadRequestException,
   Controller,
   Get,
   InternalServerErrorException,
   Logger,
+  Param,
   Query,
+  StreamableFile,
   UseGuards,
 } from '@nestjs/common';
 import {
   AlbumID3,
-  ArtistID3,
+  ArtistWithAlbumsID3,
   Child as SongID3,
   SearchResult3,
   SubsonicBaseResponse,
 } from 'subsonic-api';
 import { NavidromeService } from './navidrome.service';
 import { JwtAuthGuard } from '../auth/jwt.guard';
+import { ResolveIdPipe } from './pipes/resolveId.pipe';
 
 @Controller('music')
 @UseGuards(JwtAuthGuard)
@@ -24,77 +27,73 @@ export class NavidromeController {
 
   constructor(private server: NavidromeService) {}
 
-  /* Helper Methods */
-
-  /**
-   * Formats an Album returned from the SubSonic API, keeping specific fields
-   * @param album The Album returned from the SubSonic API
-   * @returns Updated Album with selected fields
-   */
-  formatAlbum(album: AlbumID3) {
-    const { coverArt, id, name, year, artists } = album;
+  @Get('album/:id')
+  getAlbumById(@Param('id', ResolveIdPipe('album')) album: AlbumID3 | null) {
+    if (album === null) {
+      throw new BadRequestException({
+        success: false,
+        message: 'Unable to find Album by ID',
+      });
+    }
 
     return {
-      artists,
-      coverArt,
-      id,
-      name,
-      year,
+      success: true,
+      result: this.server.formatAlbum(album),
     };
   }
 
-  /**
-   * Formats an Artist returned from the SubSonic API, keeping specific fields
-   * @param artist The Artist returned from the SubSonic API
-   * @returns Updated Artist with selected fields
-   */
-  formatArtist(artist: ArtistID3) {
-    const { albumCount, artistImageUrl, coverArt, id, name } = artist;
+  @Get('artist/:id')
+  getArtistById(
+    @Param('id', ResolveIdPipe('artist')) artist: ArtistWithAlbumsID3 | null,
+  ) {
+    if (artist === null) {
+      throw new BadRequestException({
+        success: false,
+        message: 'Unable to find Artist by ID',
+      });
+    }
 
     return {
-      albumCount,
-      artistImageUrl,
-      coverArt,
-      id,
-      name,
+      success: true,
+      result: this.server.formatArtist(artist),
     };
   }
 
-  /**
-   * Formats a Song returned from the SubSonic API, keeping specific fields
-   * @param song The Song returned from the SubSonic API
-   * @returns Updated Song with selected fields
-   */
-  formatSong(song: SongID3) {
-    const {
-      album,
-      albumArtists,
-      artists,
-      coverArt,
-      duration,
-      id,
-      title,
-      track,
-      year,
-    } = song;
+  @Get('song/:id')
+  getSongById(@Param('id', ResolveIdPipe('song')) song: SongID3 | null) {
+    if (song === null) {
+      throw new BadRequestException({
+        success: false,
+        message: 'Unable to find Song by ID',
+      });
+    }
 
     return {
-      album,
-      albumArtists,
-      artists,
-      coverArt,
-      duration,
-      id,
-      title,
-      track,
-      year,
+      success: true,
+      result: this.server.formatSong(song),
     };
   }
 
-  /* Routes */
+  @Get('coverArt/:id')
+  getCoverArtById(
+    @Param('id', ResolveIdPipe('coverArt'))
+    coverArt: Uint8Array<ArrayBuffer> | null,
+  ) {
+    if (coverArt === null) {
+      throw new BadRequestException({
+        success: false,
+        message: 'Unable to find Cover Art by ID',
+      });
+    }
+
+    return new StreamableFile(coverArt, {
+      type: 'image/bmp',
+      disposition: 'inline',
+    });
+  }
 
   @Get('search')
-  async search(@Query('query') query: string) {
+  async getSearch(@Query('query') query: string) {
     let results: SubsonicBaseResponse & { searchResult3: SearchResult3 };
 
     try {
@@ -125,12 +124,14 @@ export class NavidromeController {
 
     const filteredResults = {
       album: results.searchResult3?.album?.map((album) =>
-        this.formatAlbum(album),
+        this.server.formatAlbum(album),
       ),
       artist: results.searchResult3?.artist?.map((artist) =>
-        this.formatArtist(artist),
+        this.server.formatArtist(artist),
       ),
-      song: results.searchResult3?.song?.map((song) => this.formatSong(song)),
+      song: results.searchResult3?.song?.map((song) =>
+        this.server.formatSong(song),
+      ),
     };
 
     return {
