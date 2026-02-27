@@ -24,10 +24,6 @@ export class AuthService {
       profileImageURL,
     };
 
-    return {
-      access_token: this.jwtService.sign(payload, {
-        subject: id,
-      }),
-    };
+    return this.jwtService.sign(payload, { subject: id });
   }
 }

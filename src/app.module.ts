@@ -21,6 +21,7 @@ import { NavidromeModule } from './navidrome/navidrome.module';
       validationSchema: Joi.object({
         /* Server Configuration */
         PORT: Joi.number().port().default(3000),
+        UI_DOMAIN: Joi.string().domain().default('localhost'),
 
         /* MongoDB Configuration */
         MONGO_DB_URI: Joi.string()
