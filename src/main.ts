@@ -15,7 +15,7 @@ async function bootstrap() {
   // Configure Express to trust available proxies
   app.set(
     'trust proxy',
-    (process.env?.TRUST_PROXIES ?? 'localhost')
+    (process.env?.TRUST_PROXIES ?? '127.0.0.1')
       .split(',')
       .map((host) => host.trim()),
   );

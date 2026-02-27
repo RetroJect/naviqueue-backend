@@ -40,7 +40,7 @@ Environment variables used by the application are listed in the table below.
 |Variable Name|Default Value|Required|Description|
 |-------------|-------------|:------:|-----------|
 |CORS_DOMAINS|`localhost`||CORS allowed domains. Can be a list split by `,`. Example: `localhost,my.domain.com`|
-|TRUST_PROXIES|`localhost`||List of proxies to accept forwarded requests from. Configured the same as `CORS_DOMAINS`|
+|TRUST_PROXIES|`127.0.0.1`||List of proxies to accept forwarded requests from. Configured the same as `CORS_DOMAINS`|
 |PORT|`3000`||The port used by the API|
 |UI_DOMAIN|`localhost`||Domain name used for the session cookie storing the JWT|
 |MONGO_DB_URI|`mongodb://localhost:27017/naviqueue`||The connection URI used for MongoDB|
